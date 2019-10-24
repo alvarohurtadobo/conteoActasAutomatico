@@ -41,6 +41,8 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 actaCount = range(10005, 10222)
 actaCount = range(10001, 76814)
 actaCount = range(10786, 76814)
+actaCount = range(11369, 76814)
+
 
 client=boto3.client('rekognition', region_name='us-west-2')
 
@@ -139,6 +141,12 @@ def validateResults(list_of_results):
     if (cc[0] == 1) and (mas[0] ==-1):
         print("\tPlease check this acta, 0 allowed on centena MAS!!")
         mas[0] = 0
+
+    if cc[0] == 7:
+        cc[0] = 1
+
+    if mas[0] == 7:
+        mas[0] = 1
 
     if((-1 in cc) or (-1 in mas)):
         # All values must have been set
