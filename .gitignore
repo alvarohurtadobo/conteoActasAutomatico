@@ -1,3 +1,10 @@
+old_trials/*
+output_old/*
+badones/*
+goodones/*
+original/*
+*.jpg
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -193,11 +193,6 @@ if __name__ == "__main__":
         filewriter.writerow(['Acta', 'resultado aceptable', 'Digitos', 'Precision', 'Caja', 'Votos CC', 'Votos MAS'])
     cv2.namedWindow("Acta", cv2.WINDOW_NORMAL)
     cv2.namedWindow("ROI",  cv2.WINDOW_NORMAL)
-    archivoLocal = "croped_785331_resizedWidth.jpg"
-
-    with open(archivoLocal, "rb") as img_file:
-        my_photo_string = img_file.read()
-        my_photo_string_encoded = base64.b64encode(my_photo_string).decode('UTF-8')
 
     # Lets create the directories for storing the information
     if not os.path.isdir("./goodones/"):
