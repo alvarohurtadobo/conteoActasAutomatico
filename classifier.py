@@ -39,7 +39,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 
 #Range in excel 22 octubre: 1001,90389
 actaCount = range(10005, 10222)
-actaCount = range(10035, 10222)
+actaCount = range(10001, 76814)
 
 client=boto3.client('rekognition', region_name='us-west-2')
 
@@ -271,7 +271,7 @@ if __name__ == "__main__":
 
         cv2.imshow("ROI", hand_roi)
         cv2.imshow("Acta", img)
-        k = cv2.waitKey()
+        k = cv2.waitKey(1)
 
         
         cv2.imwrite("./{}/mesa_{}_process.jpg".format(folder, count),img)
