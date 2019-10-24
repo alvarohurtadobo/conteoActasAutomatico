@@ -40,6 +40,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 #Range in excel 22 octubre: 1001,90389
 actaCount = range(10005, 10222)
 actaCount = range(10001, 76814)
+actaCount = range(10786, 76814)
 
 client=boto3.client('rekognition', region_name='us-west-2')
 
@@ -68,10 +69,23 @@ def validateResults(list_of_results):
             print("Not digit, dropping value")
             isValid = False
             result["value"] = "0"
+            # An A in centenas is a 1 in any box
+            if (result["value"] == "A") and ((isWhitinBox(result["center"], relative_centena,relative_range_cc_vote))or(isWhitinBox(result["center"], relative_centena,relative_range_mas_vote))):
+                result["value"] = "1"
 
-        if result["accuracy"]<75:
-            print("Low accuracy")
-            isValid = False
+        if ((isWhitinBox(result["center"], relative_unidad,relative_range_cc_vote))or(isWhitinBox(result["center"], relative_unidad,relative_range_mas_vote))):
+            if (result["accuracy"] < 40):
+                print("Low accuracy for unit")
+                isValid = False
+        else:
+            if (result["value"] == "0"):
+                if (result["accuracy"] < 50):
+                    print("Low accuracy for cero")
+                    isValid = False
+            else:
+                if (result["accuracy"] < 75):
+                    print("Low accuracy for other")
+                    isValid = False
 
         # Centenas CC
         if(isWhitinBox(result["center"], relative_centena,relative_range_cc_vote)):
@@ -106,6 +120,25 @@ def validateResults(list_of_results):
 
     print("Resultado CC: {}".format(cc))
     print("Resultado MAS: {}".format(mas))
+
+    # Bajamos requisito de presicion en unidades
+    if (cc[2]==-1) and (cc[1]!=-1) and (cc[0]!=-1):
+        cc[2]=0
+    if (mas[2]==-1) and (mas[1]!=-1) and (mas[0]!=-1):
+        mas[2]=0
+
+    # Si la centena de alguno es 2, la del otro tiene que ser cero
+    if (mas[0] == 2):
+        cc[0] = 0
+    if (cc[0] == 2):
+        mas[0] = 0
+
+    if (mas[0] == 1) and (cc[0] ==-1):
+        print("\tPlease check this acta, 0 allowed on centena CC!!")
+        cc[0] = 0
+    if (cc[0] == 1) and (mas[0] ==-1):
+        print("\tPlease check this acta, 0 allowed on centena MAS!!")
+        mas[0] = 0
 
     if((-1 in cc) or (-1 in mas)):
         # All values must have been set
@@ -186,6 +219,7 @@ def detect_text(photo, size):
     return answers
 
 if __name__ == "__main__":
+    problem_url = 0
     name = datetime.now().strftime("%Y%m%d_%H%M%S")
     print('prueba_{}.csv'.format(name))
     with open('prueba_{}.csv'.format(name), 'w') as csvfile:
@@ -211,7 +245,12 @@ if __name__ == "__main__":
         
         img_array = np.array(bytearray(url_response.read()),dtype=np.uint8)
         img = cv2.imdecode(img_array, -1)
-        copy = img.copy()
+        try:
+            copy = img.copy()
+        except:
+            problem_url += 1
+            print("Could not operate on image, is URL good: {}, problems detected: {}".format(url, problem_url))
+            continue
 
         print("Received image size: {}".format(img.shape))
         roi_one = img[HAND_WRITTEN_DIGITS_ONE[1]:HAND_WRITTEN_DIGITS_ONE[3], HAND_WRITTEN_DIGITS_ONE[0]:HAND_WRITTEN_DIGITS_ONE[2]]
